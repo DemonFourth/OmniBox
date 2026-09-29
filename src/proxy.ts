@@ -210,7 +210,8 @@ export class ProxyHandler {
       }
 
       const urlObj = new URL(testUrl);
-      if (!urlObj.host.includes('.')) {
+      // 带方括号的 IPv6 字面量主机名不含点，需单独放行（私有地址仍由 isPrivateIP 拦截）
+      if (!urlObj.host.includes('.') && !urlObj.host.startsWith('[')) {
         throw new Error('Invalid host');
       }
 

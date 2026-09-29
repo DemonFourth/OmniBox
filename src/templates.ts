@@ -1088,7 +1088,7 @@ export function getMainPageTemplate(): string {
         return;
       }
 
-      if (!targetUrl.includes('.')) {
+      if (!targetUrl.includes('.') && !targetUrl.includes('[')) {
         showError('请输入有效的网站地址');
         return;
       }
@@ -1123,7 +1123,7 @@ export function getMainPageTemplate(): string {
 
       input.addEventListener('input', function() {
         const value = this.value.trim();
-        if (value && !value.includes('.')) {
+        if (value && !value.includes('.') && !value.includes('[')) {
           this.style.borderColor = 'var(--warning)';
         } else if (value) {
           this.style.borderColor = 'var(--success)';
