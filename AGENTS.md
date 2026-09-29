@@ -63,3 +63,4 @@ npm run deploy     # wrangler deploy（推送到 main 时 CI 也会自动部署�
 | 2026-09-29 | 移除弹窗「探测指定网站出口 IP」区块（两次 fetch 出口 IP 可能不同、结果不准确）及其死 CSS/JS；`/api/trace` 移除 `?url=` 分支 | `templates.ts`, `worker.ts` |
 | 2026-09-29 | 放弃外部代理核心：移除 `config.ts` 的 ProxyConfig 接口与 PROXY_* 环境变量；评估确认 Workers 上 HTTPS 隧道内 TLS 不可行 | `config.ts` |
 | 2026-09-29 | 修复密码页右上角「出口 IP」按钮被主题切换按钮完全覆盖：`.top-bar` 内 `.theme-toggle` 取消 `position: fixed`，恢复 flex 布局并统一内边距 | `templates.ts` |
+| 2026-09-29 | 代理提示横幅内直接显示出口 IP：提示脚本先捕获原生 fetch（防 `/api/trace` 被代理钩子改写到上游站），异步请求同源 `/api/trace` 渲染「当前出口 IP · 机房 · 地区」，探测失败静默 | `injector.ts` |

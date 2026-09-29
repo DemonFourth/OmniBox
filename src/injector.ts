@@ -112,6 +112,8 @@ export class ContentInjector {
     return `
 (function() {
   var hintDismissed = false;
+  // 本脚本先于 fetch 钩子脚本执行，先捕获原生 fetch，避免 /api/trace 被改写到上游站点
+  var nativeFetch = window.fetch;
   
   function createHint() {
     if (hintDismissed || document.getElementById('__omnibox_hint__')) return;
@@ -162,8 +164,12 @@ export class ContentInjector {
     messageDiv.style.cssText = 'color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; line-height: 1.4;';
     messageDiv.textContent = '您正在使用代理服务，请勿登录重要账户或输入敏感信息';
     
+    var ipDiv = document.createElement('div');
+    ipDiv.style.cssText = 'color: rgba(255, 255, 255, 0.75); font-size: 0.8rem; line-height: 1.4; margin-top: 3px; display: none;';
+    
     contentDiv.appendChild(titleDiv);
     contentDiv.appendChild(messageDiv);
+    contentDiv.appendChild(ipDiv);
     
     var closeBtn = document.createElement('button');
     closeBtn.style.cssText = [
@@ -203,6 +209,22 @@ export class ContentInjector {
     hintContainer.appendChild(hintCard);
     
     document.body.appendChild(hintContainer);
+    
+    if (typeof nativeFetch === 'function') {
+      try {
+        nativeFetch.call(window, window.location.origin + '/api/trace')
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            if (hintDismissed || !data || !data.ip || data.ip === '未知') return;
+            var text = '当前出口 IP：' + data.ip;
+            if (data.colo && data.colo !== '未知') text += ' · 机房 ' + data.colo;
+            if (data.loc && data.loc !== '未知') text += ' · 地区 ' + data.loc;
+            ipDiv.textContent = text;
+            ipDiv.style.display = 'block';
+          })
+          .catch(function() {});
+      } catch (e) {}
+    }
   }
   
   function addStyles() {
