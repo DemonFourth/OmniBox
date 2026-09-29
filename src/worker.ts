@@ -120,6 +120,42 @@ async function handleApiRequest(
     return new Response(JSON.stringify(statusResponse), { headers });
   }
 
+  if (url.pathname === '/api/trace') {
+    try {
+      const traceResponse = await fetch('https://1.1.1.1/cdn-cgi/trace');
+      const traceText = await traceResponse.text();
+
+      const traceData: Record<string, string> = {};
+      traceText.split('\n').forEach(line => {
+        const eqIndex = line.indexOf('=');
+        if (eqIndex > 0) {
+          const key = line.substring(0, eqIndex).trim();
+          const value = line.substring(eqIndex + 1).trim();
+          if (key && value) traceData[key] = value;
+        }
+      });
+
+      const traceResult: Record<string, unknown> = {
+        ip: traceData.ip || '未知',
+        colo: traceData.colo || '未知',
+        loc: traceData.loc || '未知',
+        warp: traceData.warp || '未知',
+        tls: traceData.tls || '未知',
+        http: traceData.http || '未知',
+        ts: traceData.ts || '未知'
+      };
+
+      return new Response(JSON.stringify(traceResult), { headers });
+    } catch (error) {
+      return new Response(JSON.stringify({
+        error: error instanceof Error ? error.message : '探测失败'
+      }), {
+        status: 500,
+        headers
+      });
+    }
+  }
+
   const notFoundResponse = {
     error: 'API endpoint not found'
   };

@@ -777,6 +777,192 @@ const passwordPageStyles = `
   width: 100%;
   background: var(--success);
 }
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.top-bar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.ip-probe-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(12px);
+}
+
+.ip-probe-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ip-probe-btn .icon {
+  font-size: 1rem;
+}
+
+.ip-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.ip-modal.active {
+  display: flex;
+}
+
+.ip-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.ip-modal-content {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.ip-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ip-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ip-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color var(--transition-normal);
+}
+
+.ip-modal-close:hover {
+  color: var(--text-primary);
+}
+
+.ip-modal-body {
+  padding: 16px 20px;
+}
+
+.ip-modal-section {
+  margin-bottom: 16px;
+}
+
+.ip-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.ip-modal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 20px 0;
+}
+
+.ip-modal-result {
+  display: none;
+}
+
+.ip-modal-result.show {
+  display: block;
+}
+
+.ip-modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+
+.ip-modal-row:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ip-modal-label {
+  color: var(--text-muted);
+}
+
+.ip-modal-value {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.ip-modal-value.ip-address {
+  color: var(--accent);
+}
+
+.ip-modal-error {
+  color: var(--error);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 8px 0;
+}
 `;
 
 export function getMainPageTemplate(): string {
@@ -966,10 +1152,36 @@ export function getPasswordPageTemplate(passwordCookieName: string): string {
   </style>
 </head>
 <body>
-  <button class="theme-toggle" type="button">
-    <span class="theme-toggle-icon">☀️</span>
-    <span class="theme-toggle-text">浅色</span>
-  </button>
+  <div class="top-bar">
+    <button class="theme-toggle" type="button">
+      <span class="theme-toggle-icon">☀️</span>
+      <span class="theme-toggle-text">浅色</span>
+    </button>
+    <button class="ip-probe-btn" type="button" onclick="openIpModal()">
+      <span class="icon">🔍</span>
+      <span>出口 IP</span>
+    </button>
+  </div>
+
+  <div class="ip-modal" id="ipModal">
+    <div class="ip-modal-overlay" onclick="closeIpModal()"></div>
+    <div class="ip-modal-content">
+      <div class="ip-modal-header">
+        <h3>出口 IP 信息</h3>
+        <button class="ip-modal-close" onclick="closeIpModal()">✕</button>
+      </div>
+      <div class="ip-modal-body">
+        <div class="ip-modal-section">
+          <div class="ip-modal-loading" id="ipModalLoading">
+            <div class="spinner"></div>
+            <span>正在探测...</span>
+          </div>
+          <div class="ip-modal-result" id="ipModalResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="glass-card password-container">
       <div class="header">
@@ -1081,6 +1293,70 @@ export function getPasswordPageTemplate(passwordCookieName: string): string {
 
       submitBtn.classList.remove('loading');
       submitText.textContent = '验证并继续';
+    }
+
+    const COLO_NAMES = {
+      SJC: '圣何塞', LAX: '洛杉矶', SEA: '西雅图', DFW: '达拉斯', ORD: '芝加哥',
+      ATL: '亚特兰大', MIA: '迈阿密', JFK: '纽约', IAD: '华盛顿', BOS: '波士顿',
+      LHR: '伦敦', CDG: '巴黎', AMS: '阿姆斯特丹', FRA: '法兰克福', MAD: '马德里',
+      FCO: '罗马', MUC: '慕尼黑', ARN: '斯德哥尔摩', OSL: '奥斯陆', HEL: '赫尔辛基',
+      NRT: '东京', KIX: '大阪', ICN: '首尔', HKG: '香港', TPE: '台北', SIN: '新加坡',
+      SYD: '悉尼', MEL: '墨尔本', GRU: '圣保罗', DXB: '迪拜', BOM: '孟买', DEL: '新德里'
+    };
+
+    function getIpVersion(ip) {
+      return ip.includes(':') ? 'IPv6' : 'IPv4';
+    }
+
+    function openIpModal() {
+      const modal = document.getElementById('ipModal');
+      const loading = document.getElementById('ipModalLoading');
+      const result = document.getElementById('ipModalResult');
+
+      modal.classList.add('active');
+      loading.style.display = 'flex';
+      result.classList.remove('show');
+      result.innerHTML = '';
+
+      fetch('/api/trace')
+        .then(r => r.json())
+        .then(data => {
+          loading.style.display = 'none';
+          if (data.error) {
+            result.innerHTML = '<div class="ip-modal-error">探测失败：' + data.error + '</div>';
+            result.classList.add('show');
+            return;
+          }
+          const coloName = COLO_NAMES[data.colo] || data.colo;
+          result.innerHTML = [
+            '<div class="ip-modal-row">',
+            '  <span class="ip-modal-label">出口 IP</span>',
+            '  <span class="ip-modal-value ip-address">' + (data.ip || '未知') + '</span>',
+            '</div>',
+            '<div class="ip-modal-row">',
+            '  <span class="ip-modal-label">IP 版本</span>',
+            '  <span class="ip-modal-value">' + getIpVersion(data.ip || '') + '</span>',
+            '</div>',
+            '<div class="ip-modal-row">',
+            '  <span class="ip-modal-label">节点</span>',
+            '  <span class="ip-modal-value">' + data.colo + '（' + coloName + '）</span>',
+            '</div>',
+            '<div class="ip-modal-row">',
+            '  <span class="ip-modal-label">用户位置</span>',
+            '  <span class="ip-modal-value">' + (data.loc || '未知') + '</span>',
+            '</div>'
+          ].join('');
+          result.classList.add('show');
+        })
+        .catch(() => {
+          loading.style.display = 'none';
+          result.innerHTML = '<div class="ip-modal-error">网络错误，请稍后重试</div>';
+          result.classList.add('show');
+        });
+    }
+
+    function closeIpModal() {
+      document.getElementById('ipModal').classList.remove('active');
     }
 
     document.getElementById('password').addEventListener('keypress', function(e) {
