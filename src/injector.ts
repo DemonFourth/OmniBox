@@ -217,8 +217,11 @@ export class ContentInjector {
           .then(function(data) {
             if (hintDismissed || !data || !data.ip || data.ip === '未知') return;
             var text = '当前出口 IP：' + data.ip;
-            if (data.colo && data.colo !== '未知') text += ' · 机房 ' + data.colo;
-            if (data.loc && data.loc !== '未知') text += ' · 地区 ' + data.loc;
+            if (data.colo && data.colo !== '未知') {
+              text += ' · 机房 ' + data.colo;
+              if (data.coloCity) text += '（' + data.coloCity + '）';
+            }
+            if (data.loc && data.loc !== '未知') text += ' · 出口归属 ' + data.loc;
             ipDiv.textContent = text;
             ipDiv.style.display = 'block';
           })

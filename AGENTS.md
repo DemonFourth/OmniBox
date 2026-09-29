@@ -65,3 +65,4 @@ npm run deploy     # wrangler deploy（推送到 main 时 CI 也会自动部署�
 | 2026-09-29 | 修复密码页右上角「出口 IP」按钮被主题切换按钮完全覆盖：`.top-bar` 内 `.theme-toggle` 取消 `position: fixed`，恢复 flex 布局并统一内边距 | `templates.ts` |
 | 2026-09-29 | 代理提示横幅内直接显示出口 IP：提示脚本先捕获原生 fetch（防 `/api/trace` 被代理钩子改写到上游站），异步请求同源 `/api/trace` 渲染「当前出口 IP · 机房 · 地区」，探测失败静默 | `injector.ts` |
 | 2026-09-29 | 修复请求头真实 IP 泄露：`modifyClientHeaders` 转发上游前剥离 `cf-*` 前缀与 XFF/真实IP类头（清单入 `CONFIG.HEADERS.STRIP_REQUEST_HEADERS`）。实测证据：api6.ipify.org 曾回显用户电信上海真实 IP | `config.ts`, `proxy.ts` |
+| 2026-09-29 | 机房代码中文化：`CONFIG.COLO_NAMES`（IATA→中文城市，单一事实源）；`/api/trace` 新增 `coloCity` 字段；横幅显示「机房 AMS（阿姆斯特丹）」；横幅「地区」与弹窗「用户位置」均系误标（loc 实为出口 IP 的 GeoIP 归属）统一改为「出口归属」，弹窗字典删本地副本改用 `coloCity` | `config.ts`, `worker.ts`, `injector.ts`, `templates.ts` |

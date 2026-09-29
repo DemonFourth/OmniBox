@@ -138,6 +138,7 @@ async function handleApiRequest(
       const traceResult: Record<string, unknown> = {
         ip: traceData.ip || '未知',
         colo: traceData.colo || '未知',
+        coloCity: CONFIG.COLO_NAMES[traceData.colo] || '',
         loc: traceData.loc || '未知',
         warp: traceData.warp || '未知',
         tls: traceData.tls || '未知',

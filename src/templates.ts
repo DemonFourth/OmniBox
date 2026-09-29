@@ -1301,15 +1301,6 @@ export function getPasswordPageTemplate(passwordCookieName: string): string {
       submitText.textContent = '验证并继续';
     }
 
-    const COLO_NAMES = {
-      SJC: '圣何塞', LAX: '洛杉矶', SEA: '西雅图', DFW: '达拉斯', ORD: '芝加哥',
-      ATL: '亚特兰大', MIA: '迈阿密', JFK: '纽约', IAD: '华盛顿', BOS: '波士顿',
-      LHR: '伦敦', CDG: '巴黎', AMS: '阿姆斯特丹', FRA: '法兰克福', MAD: '马德里',
-      FCO: '罗马', MUC: '慕尼黑', ARN: '斯德哥尔摩', OSL: '奥斯陆', HEL: '赫尔辛基',
-      NRT: '东京', KIX: '大阪', ICN: '首尔', HKG: '香港', TPE: '台北', SIN: '新加坡',
-      SYD: '悉尼', MEL: '墨尔本', GRU: '圣保罗', DXB: '迪拜', BOM: '孟买', DEL: '新德里'
-    };
-
     function getIpVersion(ip) {
       return ip.includes(':') ? 'IPv6' : 'IPv4';
     }
@@ -1333,7 +1324,7 @@ export function getPasswordPageTemplate(passwordCookieName: string): string {
             result.classList.add('show');
             return;
           }
-          const coloName = COLO_NAMES[data.colo] || data.colo;
+          const coloName = data.coloCity || data.colo;
           result.innerHTML = [
             '<div class="ip-modal-row">',
             '  <span class="ip-modal-label">出口 IP</span>',
@@ -1344,11 +1335,11 @@ export function getPasswordPageTemplate(passwordCookieName: string): string {
             '  <span class="ip-modal-value">' + getIpVersion(data.ip || '') + '</span>',
             '</div>',
             '<div class="ip-modal-row">',
-            '  <span class="ip-modal-label">节点</span>',
+            '  <span class="ip-modal-label">机房</span>',
             '  <span class="ip-modal-value">' + data.colo + '（' + coloName + '）</span>',
             '</div>',
             '<div class="ip-modal-row">',
-            '  <span class="ip-modal-label">用户位置</span>',
+            '  <span class="ip-modal-label">出口归属</span>',
             '  <span class="ip-modal-value">' + (data.loc || '未知') + '</span>',
             '</div>'
           ].join('');
