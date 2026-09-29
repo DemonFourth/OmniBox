@@ -64,3 +64,4 @@ npm run deploy     # wrangler deploy（推送到 main 时 CI 也会自动部署�
 | 2026-09-29 | 放弃外部代理核心：移除 `config.ts` 的 ProxyConfig 接口与 PROXY_* 环境变量；评估确认 Workers 上 HTTPS 隧道内 TLS 不可行 | `config.ts` |
 | 2026-09-29 | 修复密码页右上角「出口 IP」按钮被主题切换按钮完全覆盖：`.top-bar` 内 `.theme-toggle` 取消 `position: fixed`，恢复 flex 布局并统一内边距 | `templates.ts` |
 | 2026-09-29 | 代理提示横幅内直接显示出口 IP：提示脚本先捕获原生 fetch（防 `/api/trace` 被代理钩子改写到上游站），异步请求同源 `/api/trace` 渲染「当前出口 IP · 机房 · 地区」，探测失败静默 | `injector.ts` |
+| 2026-09-29 | 修复请求头真实 IP 泄露：`modifyClientHeaders` 转发上游前剥离 `cf-*` 前缀与 XFF/真实IP类头（清单入 `CONFIG.HEADERS.STRIP_REQUEST_HEADERS`）。实测证据：api6.ipify.org 曾回显用户电信上海真实 IP | `config.ts`, `proxy.ts` |

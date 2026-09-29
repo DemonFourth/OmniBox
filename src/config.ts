@@ -12,6 +12,7 @@ export interface PerformanceConfig {
 
 export interface HeadersConfig {
   REMOVE_HEADERS: string[];
+  STRIP_REQUEST_HEADERS: string[];
   ADD_HEADERS: Record<string, string>;
   CORS_HEADERS: Record<string, string>;
 }
@@ -97,6 +98,19 @@ Crawl-delay: 10
       'Cross-Origin-Resource-Policy',
       'X-Frame-Options',
       'Strict-Transport-Security'
+    ],
+
+    // 转发给上游前必须剥离的请求头（小写）：Cloudflare 边缘为浏览器请求注入的
+    // cf-* 与 x-forwarded-*/真实IP类头会让信任这些头的上游站点看到用户真实 IP
+    STRIP_REQUEST_HEADERS: [
+      'x-forwarded-for',
+      'x-forwarded-proto',
+      'x-forwarded-host',
+      'x-forwarded-port',
+      'x-real-ip',
+      'x-client-ip',
+      'x-cluster-ip',
+      'true-client-ip'
     ],
 
     ADD_HEADERS: {

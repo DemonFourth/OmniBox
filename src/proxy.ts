@@ -305,7 +305,14 @@ export class ProxyHandler {
     ];
 
     headers.forEach((value, key) => {
-      if (key.toLowerCase() === 'cookie') {
+      const lowerKey = key.toLowerCase();
+
+      // 剥离边缘注入的真实 IP / 链路信息头（cf-* 前缀 + 显式清单），防止上游还原用户真实 IP
+      if (lowerKey.startsWith('cf-') || CONFIG.HEADERS.STRIP_REQUEST_HEADERS.includes(lowerKey)) {
+        return;
+      }
+
+      if (lowerKey === 'cookie') {
         // 过滤掉内部 Cookie，只将业务 Cookie 透传给上游
         const filteredCookie = value
           .split(';')
