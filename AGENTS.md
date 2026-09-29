@@ -45,7 +45,8 @@ npm run deploy     # wrangler deploy（推送到 main 时 CI 也会自动部署�
 
 ## 已知问题
 
-- `src/injector.ts` 的 `XMLHttpRequest.prototype.open` 重写**实际失效**：重写了局部 `url` 却用 `originalOpen.apply(this, arguments)` 传了原始参数，XHR 请求未走代理。修复：显式传参 `originalOpen.call(this, method, url, async, user, password)`。
+- ~~`XMLHttpRequest.prototype.open` 重写失效~~ **已证伪（2026-09-29 线上实测）**：注入脚本为内联非严格模式，`arguments` 与形参联动映射，`apply(this, arguments)` 传的就是改写后的 URL；探针确认 XHR 正常走代理。勿再按旧描述"修复"。
+- **代理路径不支持带方括号的 IPv6 字面量目标**：`/https://[2606:4700:4700::1111]/cdn-cgi/trace` 实测返回 nginx 404（URL 解析被弄坏），未修。
 - `src/utils.ts` 的 `sha256Hex()` 已无调用方（缓存移除后的死代码）。
 - `package.json` keywords 仍含 `kv-cache`，但 KV 已在 `ed09e6a` 移除。
 - **本机 `npm run lint` 报 "eslint 不是内部或外部命令"**：`node_modules/.bin` 缺 eslint 可执行文件。临时替代：`node node_modules\eslint\bin\eslint.js src`。
@@ -66,3 +67,4 @@ npm run deploy     # wrangler deploy（推送到 main 时 CI 也会自动部署�
 | 2026-09-29 | 代理提示横幅内直接显示出口 IP：提示脚本先捕获原生 fetch（防 `/api/trace` 被代理钩子改写到上游站），异步请求同源 `/api/trace` 渲染「当前出口 IP · 机房 · 地区」，探测失败静默 | `injector.ts` |
 | 2026-09-29 | 修复请求头真实 IP 泄露：`modifyClientHeaders` 转发上游前剥离 `cf-*` 前缀与 XFF/真实IP类头（清单入 `CONFIG.HEADERS.STRIP_REQUEST_HEADERS`）。实测证据：api6.ipify.org 曾回显用户电信上海真实 IP | `config.ts`, `proxy.ts` |
 | 2026-09-29 | 机房代码中文化：`CONFIG.COLO_NAMES`（IATA→中文城市，单一事实源）；`/api/trace` 新增 `coloCity` 字段；横幅显示「机房 AMS（阿姆斯特丹）」；横幅「地区」与弹窗「用户位置」均系误标（loc 实为出口 IP 的 GeoIP 归属）统一改为「出口归属」，弹窗字典删本地副本改用 `coloCity` | `config.ts`, `worker.ts`, `injector.ts`, `templates.ts` |
+| 2026-09-29 | 复核撤销「XHR open 重写失效」已知问题：非严格模式 `arguments` 联动映射使钩子实际生效，线上探针双信号（responseURL 走代理 + ip 为 CF 出口）证伪；同轮登记新缺陷「IPv6 字面量目标 404」 | `AGENTS.md` |
