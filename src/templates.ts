@@ -796,6 +796,12 @@ const passwordPageStyles = `
   z-index: 1000;
 }
 
+/* 主题按钮放进 .top-bar 后取消公共样式的固定定位，避免与「出口 IP」按钮重叠 */
+.top-bar .theme-toggle {
+  position: static;
+  padding: 8px 14px;
+}
+
 .ip-probe-btn {
   display: flex;
   align-items: center;
